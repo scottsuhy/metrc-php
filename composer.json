@@ -1,5 +1,5 @@
 {
-    "name": "alternatehealth/metrc",
+    "name": "scottsuhy/metrc-php",
     "description": "PHP Wrapper to the metrc api",
     "type": "library",
     "license": "MIT",
