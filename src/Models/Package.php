@@ -66,6 +66,15 @@ class Package extends ApiObject
      */
     public $ingredients = array();
 
+    //SBS added
+    public $Location = null;    
+    public function setLocation(?string $Location): void
+    {  
+        $this->Location = $Location;        
+    }
+    public function getLocation(): ?string
+    {  return $this->Location;     }
+
     /**
      * @return string|null
      */
@@ -117,7 +126,8 @@ class Package extends ApiObject
     /**
      * @return string
      */
-    public function getItem(): string
+    public function getItem(): array //SBS changed string
+    //public function getItem(): string
     {
         return $this->item;
     }
@@ -125,7 +135,8 @@ class Package extends ApiObject
     /**
      * @param string $item
      */
-    public function setItem(string $item): void
+    public function setItem(array $item): void //SBS Changed string $item): void
+    //public function setItem(string $item): void
     {
         $this->item = $item;
     }
@@ -262,14 +273,16 @@ class Package extends ApiObject
      */
     public function setIngredients(array $ingredients): void
     {
+        //dd($ingredients);
         $this->ingredients = $ingredients;
     }
 
     public function toArray()
     {
+        //dd($this->getIngredients());
         return [
-            'Tag' => $this->getTag(),
-            "Room" => $this->getRoom(),
+            "Tag" => $this->getTag(),
+            //"Room" => $this->getRoom(),
             "Item" => $this->getItem(),
             "Quantity" => $this->getQuantity(),
             "UnitOfMeasure" => $this->getUnitOfMeasure(),
@@ -277,10 +290,10 @@ class Package extends ApiObject
             "IsProductionBatch" => $this->isProductionBatch(),
             "ProductionBatchNumber" => $this->getProductionBatchNumber(),
             "ProductRequiresRemediation" => $this->isProductRequiresRemediation(),
-            "ActualDate" => $this->getActualDate()->format(\DateTime::ISO8601),
-            'Ingredients' => [
-                $this->getIngredients()
-            ]
+            "ActualDate" => $this->getActualDate()->format(\DateTime::ISO8601),            
+            //"Ingredients" => [ $this->getIngredients() ],
+            "Ingredients" => $this->getIngredients(),            
+            "Location" => $this->getLocation()
         ];
     }
 

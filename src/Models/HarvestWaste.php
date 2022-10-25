@@ -21,6 +21,8 @@ class HarvestWaste extends ApiObject
      */
     public $wasteWeight;
 
+    public $wasteType; //SBS Added
+
     /**
      * @var \DateTimeInterface
      */
@@ -71,12 +73,24 @@ class HarvestWaste extends ApiObject
         return $this->wasteWeight;
     }
 
+    //SBS Added
+    public function getWasteType(): string
+    {
+        return $this->wasteType;
+    }
+
     /**
      * @param float $wasteWeight
      */
     public function setWasteWeight(float $wasteWeight): void
     {
         $this->wasteWeight = $wasteWeight;
+    }
+
+    //SBS Added
+    public function setWasteType(string $wasteType): void
+    {
+        $this->wasteType = $wasteType;
     }
 
     /**
@@ -108,6 +122,7 @@ class HarvestWaste extends ApiObject
             'Id' => $this->getId(),
             'UnitOfWeight' => $this->getUnitOfWeight(),
             'WasteWeight' => $this->getWasteWeight(),
+            'WasteType' => $this->getWasteType(), //SBS Added
             'ActualDate' => $this->getActualDate()->format('Y-m-d')
         ];
     }

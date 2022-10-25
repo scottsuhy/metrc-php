@@ -6,6 +6,7 @@ use MetrcApi\Exception\AccessDeniedException;
 use MetrcApi\Exception\InvalidMetrcResponseException;
 use MetrcApi\Models\ApiObject;
 use MetrcApi\Models\Facility;
+use MetrcApi\Models\Location; //SBS ADDED
 use MetrcApi\Models\Harvest;
 use MetrcApi\Models\HarvestPackage;
 use MetrcApi\Models\HarvestWaste;
@@ -13,6 +14,7 @@ use MetrcApi\Models\Item;
 use MetrcApi\Models\ItemCategory;
 use MetrcApi\Models\LabTest;
 use MetrcApi\Models\Package;
+use MetrcApi\Models\Package2;
 use MetrcApi\Models\PackageAdjustment;
 use MetrcApi\Models\PackageChangeItem;
 use MetrcApi\Models\PackageFinish;
@@ -26,6 +28,8 @@ use MetrcApi\Models\Room;
 use MetrcApi\Models\SalesReceipt;
 use MetrcApi\Models\Strain;
 use MetrcApi\Models\Transfer;
+
+use Illuminate\Support\Facades\Log;
 
 class MetrcApi
 {
@@ -96,6 +100,7 @@ class MetrcApi
      */
     private function executeAction($obj = false): MetrcApiResponse
     {
+        //dd($obj);
         $base = $this->sandbox ? self::SANDBOX_URL : self::PRODUCTION_URL;
         $base = str_replace('%state%', $this->state, $base);
 
@@ -110,7 +115,7 @@ class MetrcApi
 
         if($this->method != 'GET') {
             if($this->method == 'POST') {
-                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POST, true);                
             } else {
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($this->method));
             }
@@ -127,22 +132,39 @@ class MetrcApi
 
                 } else {
                     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([$obj->toArray()]));
+                    //dd(json_encode([$obj->toArray()]));
                 }
             }
         }
-
+                        
         $result = curl_exec($ch);
+
+        if($this->method != 'GET') {
+           /*Log::info("MetricApi@executeAction (POST request)", [
+                'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),            
+                'objects' => json_encode([$obj->toArray(),
+                'CURL API result' => $result
+                ])
+            ]);        */
+        }
+        else{
+           /*Log::info("MetricApi@executeAction (GET request)", [
+                'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),
+                'CURL API result' => $result                                
+            ]);        */
+        }
 
         $response = new MetrcApiResponse();
         $response->setRawResponse($result);
         $response->setHttpCode(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
-        if($response->getHttpCode() == 401) {
+//SBS Changed
+  /*      if($response->getHttpCode() == 401) {
             throw new AccessDeniedException();
         } elseif($response->getHttpCode() == 500) {
             throw new InvalidMetrcResponseException(isset($response->getResponse()['Message']) ? $response->getResponse()['Message'] : 'API Response Returned 500 error!');
         }
-
+*/
         return $response;
     }
 
@@ -169,11 +191,20 @@ class MetrcApi
 
         $responseArray = $response->getResponse();
 
+        if(is_null($responseArray)){
+            return $arr;
+        }
+
+        //Log::info("MetricApi@mapResponseToObjectArray", ['$responseArray'=>$responseArray]);
+
         foreach($responseArray as $k => $v) {
             $arr[$k] = new $class;
-            foreach($responseArray[$k] as $k2 => $v2) {
+            //Log::info("MetricApi@inside foreach 1", ['$arr[$k]'=>$arr[$k], '$k'=>$k]);
+            foreach($responseArray[$k] as $k2 => $v2) {                
                 $method = sprintf('set%s', ucwords($k2));
+                //Log::info("MetricApi@inside foreach 2", ['$method'=>$method, '$k2'=>$k2]);
                 $arr[$k]->{$method}($v2);
+                //Log::info("MetricApi@inside foreach 2", ['$v2'=>$v2]);
             }
         }
 
@@ -191,8 +222,51 @@ class MetrcApi
     {
         $this->route = '/facilities/v1/';
         $response = $this->executeAction();
+       //Log::info("MetricApi@getFacilities (response)", ['$response'=>$response]);
         return $this->mapResponseToObjectArray($response, Facility::class);
     }
+
+    //SBS Added
+    public function getLocations(): ?array
+    {        
+        $this->route = '/locations/v1/active/';
+        $response = $this->executeAction();
+       //Log::info("MetricApi@getLocations (response)", ['$response'=>$response]);
+        return $this->mapResponseToObjectArray($response, Location::class);
+    }
+    //SBS Added
+    public function getLocation($id)//: ?array
+    {
+        $this->route = '/locations/v1/' . $id;
+        //Log::info("MetricApi@getLocation (request sent)", ['$id'=>$id]);
+        $response = $this->executeAction();
+       //Log::info("MetricApi@getLocation (response)", ['$response'=>$response]);
+        return $response; // $this->mapResponseToObject($response, Location::class);
+    }
+    //SBS Added
+    public function createLocation(Location $location): MetrcApiResponse
+    {
+        $this->route = '/locations/v1/create';
+        $this->method = 'POST';
+
+        //Log::info("MetricApi@createLocation (request sent)", ['$location'=>$location]);
+        $response = $this->executeAction($location);
+       //Log::info("MetricApi@createLocation (response)", ['$response'=>$response]);
+
+        //dd($response);
+        return $response;
+    }
+    //SBS Added    
+    public function updateLocation(Location $location): MetrcApiResponse
+    {
+        $this->route = '/locations/v1/update';
+        $this->method = 'POST';
+        //Log::info("MetricApi@updateLocation (request sent)", ['$location'=>$location]);
+        $response = $this->executeAction($location);
+       //Log::info("MetricApi@updatteLocation (response)", ['$response'=>$response]);
+        return $response;
+    }
+
 
     /**
      * Get an array of harvests
@@ -202,10 +276,17 @@ class MetrcApi
      * @return array|null
      * @throws \Exception|InvalidMetrcResponseException
      */
-    public function getHarvests($type = 'active'): ?array
+    public function getHarvests($type = 'active', \DateTimeInterface $startDate = null, \DateTimeInterface $stopDate = null): ?array
     {
-        $this->route = '/harvests/v1/' . $type;
+        $this->route = '/harvests/v1/' . $type; 
+
+        if($startDate && $stopDate) {
+            $this->queryParams['lastModifiedStart'] = $startDate->format(\DateTime::ISO8601);
+            $this->queryParams['lastModifiedEnd']   = $stopDate->format(\DateTime::ISO8601);
+        }
+
         $response = $this->executeAction();
+       //Log::info("MetricApi@getHarvests (response)", ['$response'=>$response]);
         return $this->mapResponseToObjectArray($response, Harvest::class);
     }
 
@@ -219,9 +300,11 @@ class MetrcApi
      */
     public function createHarvestPackage(HarvestPackage $package): MetrcApiResponse
     {
-        $this->route = '/harvests/v1/createpackages';
+        $this->route = '/harvests/v1/create/packages';
         $this->method = 'POST';
+        //Log::info("MetricApi@createHarvestPackage (before executeAction)", ['$package'=>$package]);
         $response = $this->executeAction($package);
+       //Log::info("MetricApi@createHarvestPackage (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -238,6 +321,7 @@ class MetrcApi
         $this->route = '/harvests/v1/removewaste';
         $this->method = 'POST';
         $response = $this->executeAction($waste);
+       //Log::info("MetricApi@createHarvestWaste (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -254,6 +338,7 @@ class MetrcApi
         $this->route = '/harvests/v1/finish';
         $this->method = 'POST';
         $response = $this->executeAction($harvest);
+       //Log::info("MetricApi@finishHarvest (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -270,6 +355,7 @@ class MetrcApi
         $this->route = '/harvests/v1/unfinish';
         $this->method = 'POST';
         $response = $this->executeAction($harvest);
+       //Log::info("MetricApi@unfinishHarvest (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -285,6 +371,7 @@ class MetrcApi
     {
         $this->route = '/items/v1/' . $id;
         $response = $this->executeAction();
+       //Log::info("MetricApi@getItem (response)", ['$response'=>$response]);
         return $this->mapResponseToObject($response, Item::class);
     }
 
@@ -300,6 +387,7 @@ class MetrcApi
     {
         $this->route = '/items/v1/' . $type;
         $response = $this->executeAction();
+       //Log::info("MetricApi@getItems (response)", ['$response'=>$response]);
         return $this->mapResponseToObjectArray($response, Item::class);
     }
 
@@ -316,6 +404,7 @@ class MetrcApi
         $this->route = '/items/v1/create';
         $this->method = 'POST';
         $response = $this->executeAction($item);
+       //Log::info("MetricApi@createItem (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -332,6 +421,7 @@ class MetrcApi
         $this->route = '/items/v1/update';
         $this->method = 'POST';
         $response = $this->executeAction($item);
+       //Log::info("MetricApi@updateItem (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -348,6 +438,7 @@ class MetrcApi
         $this->route = '/items/v1/' . $id;
         $this->method = 'DELETE';
         $response = $this->executeAction();
+       //Log::info("MetricApi@deleteItem (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -373,11 +464,20 @@ class MetrcApi
      * @return Package|null
      * @throws \Exception|InvalidMetrcResponseException
      */
-    public function getPackage($id): ?Package
+    public function getPackage($id): MetrcApiResponse //SBS changed ?Package
     {
         $this->route = '/packages/v1/' . $id;
         $response = $this->executeAction();
+       //Log::info("MetricApi@getPackage (response)", ['$response'=>$response]);
+/*
+        if(!$response->success){
+            $message = "ERROR: " . $response->httpCode . " " . $response->rawResponse;
+            dd($message);
+        }
+
         return $this->mapResponseToObject($response, Package::class);
+*/
+        return $response;        
     }
 
     /**
@@ -409,6 +509,7 @@ class MetrcApi
         $this->route = '/packages/v1/change/item';
         $this->method = 'POST';
         $response = $this->executeAction($package);
+       //Log::info("MetricApi@changePackageItem (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -456,6 +557,7 @@ class MetrcApi
     {
         $this->route = '/packages/v1/' . $type;
         $response = $this->executeAction();
+        //Log::info("MetricApi@getPackages (response)", ['$response'=>$response]);
         return $this->mapResponseToObjectArray($response, Package::class);
     }
 
@@ -467,11 +569,13 @@ class MetrcApi
      * @return MetrcApiResponse
      * @throws \Exception|InvalidMetrcResponseException
      */
-    public function createPackage(Package $package): MetrcApiResponse
+    public function createPackage(Package2 $package): MetrcApiResponse
     {
         $this->route = '/packages/v1/create';
         $this->method = 'POST';
+        //dd($package);        
         $response = $this->executeAction($package);
+       //Log::info("MetricApi@createPackage (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -512,12 +616,20 @@ class MetrcApi
      * @return array
      * @throws \Exception|InvalidMetrcResponseException
      */
-    public function getPlantBatches($type = 'active'): ?array
+    public function getPlantBatches($type = 'active', \DateTimeInterface $startDate = null, \DateTimeInterface $stopDate = null): ?array
     {
         $this->route = '/plantbatches/v1/' . $type;
+
+        if($startDate && $stopDate) {
+            $this->queryParams['lastModifiedStart'] = $startDate->format(\DateTime::ISO8601);
+            $this->queryParams['lastModifiedEnd']   = $stopDate->format(\DateTime::ISO8601);
+        }
+
         $response = $this->executeAction();
         return $this->mapResponseToObjectArray($response, PlantBatch::class);
     }
+
+    
 
     /**
      * Create a planting in a batch
@@ -553,6 +665,34 @@ class MetrcApi
         return $response;
     }
 
+    //SBS added
+    public function splitPlantBatch(PlantBatch $plantbatch): MetrcApiResponse
+    {
+        $this->route = '/plantbatches/v1/split';
+        $this->method = 'POST';
+        $response = $this->executeAction($plantbatch);
+       //Log::info("MetricApi@splitPlantBatch (response)", ['$response'=>$response]);
+        return $response;
+    }
+
+    public function createPackageFromMotherPlant(PlantBatch $plantbatch): MetrcApiResponse
+    {
+        $this->route = '/plantbatches/v1/create/packages/frommotherplant';
+        $this->method = 'POST';
+        $response = $this->executeAction($plantbatch);
+       //Log::info("MetricApi@createPackageFromMotherPlant (response)", ['$response'=>$response]);
+        return $response;
+    }
+
+    public function createPackagesFromPlantBatch(PlantBatch $plantbatch): MetrcApiResponse
+    {
+        $this->route = '/plantbatches/v1/createpackages';
+        $this->method = 'POST';
+        $response = $this->executeAction($plantbatch);
+       //Log::info("MetricApi@createPackagesFromPlantBatch (response)", ['$response'=>$response]);
+        return $response;
+    }
+
     /**
      * Change the growth phase of a plant batch
      *
@@ -566,6 +706,7 @@ class MetrcApi
         $this->route = '/plantbatches/v1/changegrowthphase';
         $this->method = 'POST';
         $response = $this->executeAction($planting);
+       //Log::info("MetricApi@changeGrowthPhase (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -593,11 +734,11 @@ class MetrcApi
      * @return Room|null
      * @throws \Exception|InvalidMetrcResponseException
      */
-    public function getPlant(int $id): ?Plant
+    public function getPlant(string $PlantTag): MetrcApiResponse //?Plant      //SBS Changed //int $id): ?Plant
     {
-        $this->route = '/plants/v1/' . $id;
+        $this->route = '/plants/v1/' . $PlantTag; //SBS Changed from $id
         $response = $this->executeAction();
-        return $this->mapResponseToObject($response, Plant::class);
+        return $response; //$this->mapResponseToObject($response, Plant::class);
     }
 
     /**
@@ -646,8 +787,9 @@ class MetrcApi
     public function destroyPlant(Plant $plant): MetrcApiResponse
     {
         $this->route = '/plants/v1/destroyplants';
-        $this->method = 'POST';
+        $this->method = 'POST';        
         $response = $this->executeAction($plant);
+       //Log::info("MetricApi@destroyPlant (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -664,6 +806,27 @@ class MetrcApi
         $this->route = '/plants/v1/moveplants';
         $this->method = 'POST';
         $response = $this->executeAction($plant);
+       //Log::info("MetricApi@movePlant (response)", ['$response'=>$response]);
+        return $response;
+    }
+
+    public function plantsCreatePlantings(Plant $plant): MetrcApiResponse
+    {
+        $this->route = '/plants/v1/create/plantings';                        
+        $this->method = 'POST';
+       //Log::info("MetricApi@plantsCreatePlantings (plant)", ['$plant'=>$plant]);
+        $response = $this->executeAction($plant);
+       //Log::info("MetricApi@plantsCreatePlantings (response)", ['$response'=>$response]);
+        return $response;
+    }
+
+    public function plantsCreatePlantBatchPackages(Plant $plant): MetrcApiResponse
+    {
+        $this->route = '/plants/v1/create/plantbatch/packages';                        
+        $this->method = 'POST';
+        //Log::info("MetricApi@plantsCreatePlantBatchPackages (plant)", ['$plant'=>$plant]);
+        $response = $this->executeAction($plant);
+       //Log::info("MetricApi@plantsCreatePlantBatchPackages (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -675,11 +838,12 @@ class MetrcApi
      * @return MetrcApiResponse
      * @throws InvalidMetrcResponseException
      */
-    public function manicurePlant(PlantHarvest $plant): MetrcApiResponse
+    public function manicurePlant(PlantHarvest $plant): MetrcApiResponse 
     {
         $this->route = '/plants/v1/manicureplants';
         $this->method = 'POST';
-        $response = $this->executeAction($plant);
+        $response = $this->executeAction($plant);   
+       //Log::info("MetricApi@manicurePlant (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -696,6 +860,7 @@ class MetrcApi
         $this->route = '/plants/v1/harvestplants';
         $this->method = 'POST';
         $response = $this->executeAction($plant);
+       //Log::info("MetricApi@harvestPlant (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -785,11 +950,13 @@ class MetrcApi
      * @return array
      * @throws \Exception|InvalidMetrcResponseException
      */
-    public function getStrain($id): ?array
+    public function getStrain($id)//: ?array
     {
         $this->route = '/strains/v1/' . $id;
+        //Log::info("MetricApi@getStrain (request sent)", ['$id'=>$id, '$this'=>$this->route]);
         $response = $this->executeAction();
-        return $this->mapResponseToObject($response, Strain::class);
+       //Log::info("MetricApi@getStrain (response)", ['$response'=>$response]);
+        return $response;//$this->mapResponseToObject($response, Strain::class);
     }
 
     /**
@@ -818,7 +985,9 @@ class MetrcApi
     {
         $this->route = '/strains/v1/create';
         $this->method = 'POST';
+        //Log::info("MetricApi@createStrain (request sent)", ['$strain'=>$strain]);
         $response = $this->executeAction($strain);
+       //Log::info("MetricApi@createStrain (response)", ['$strain'=>$strain]);
         return $response;
     }
 
@@ -834,7 +1003,9 @@ class MetrcApi
     {
         $this->route = '/strains/v1/update';
         $this->method = 'POST';
+        //Log::info("MetricApi@updateStrain (request sent)", ['$strain'=>$strain]);
         $response = $this->executeAction($strain);
+       //Log::info("MetricApi@updatteStrain (response)", ['$response'=>$response]);
         return $response;
     }
 
@@ -983,7 +1154,19 @@ class MetrcApi
             $this->queryParams['lastModifiedEnd'] = $stopDate->format(\DateTime::ISO8601);
         }
         $response = $this->executeAction();
+       //Log::info("MetricApi@getTransfers (response)", ['$response'=>$response]);
         return $this->mapResponseToObjectArray($response, Transfer::class);
+    }
+
+    //SBS added
+    public function findTransfer($id): MetrcApiResponse
+    {
+        $this->route = '/transfers/v1/' . $id . '/deliveries/';
+        //$this->route = '/transfers/v1/delivery/' . $id . '/packages/wholesale';        
+        $this->method = 'GET';
+        $response = $this->executeAction();
+       //Log::info("MetricApi@findTransfers (response)", ['$response'=>$response]);
+        return $response;
     }
 
     /**

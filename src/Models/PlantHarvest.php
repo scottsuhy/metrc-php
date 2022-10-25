@@ -46,6 +46,9 @@ class PlantHarvest extends ApiObject
      */
     public $harvestName;
 
+    //SBS Added
+    public $DryingLocation;
+
     public function __construct()
     {
         $this->actualDate = new \DateTime();
@@ -186,17 +189,24 @@ class PlantHarvest extends ApiObject
         $this->harvestName = $harvestName;
     }
 
+    //SBS Added
+    public function setDryingLocation(?string $DryingLocation): void
+    {  $this->DryingLocation = $DryingLocation;  } 
+    public function getDryingLocation(): ?string
+    {  return $this->DryingLocation;  } 
+
     public function toArray()
     {
         return [
-            'Id' => $this->getId(),
+            //'Id' => $this->getId(),
             'Plant' => $this->getPlant(),
-            'DryingRoom' => $this->getRoom(),
+            //'DryingRoom' => $this->getRoom(),
             'PatientLicenseNumber' => $this->getPatientLicenseNumber(),
             'HarvestName' => $this->getHarvestName(),
             'Weight' => $this->getWeight(),
             'UnitOfWeight' => $this->getUnitOfWeight(),
-            'ActualDate' => $this->getActualDate()->format('Y-m-d')
+            'ActualDate' => $this->getActualDate()->format('Y-m-d'),
+            'DryingLocation' => $this->getDryingLocation()    
         ];
     }
 }

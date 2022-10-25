@@ -4,12 +4,12 @@ namespace MetrcApi\Models;
 
 use MetrcApi\Exception\InvalidMetrcResponseException;
 
-class HarvestPackage extends ApiObject
+class Package2 extends ApiObject
 {
     /**
-     * @var int
+     * @var null|string
      */
-    public $harvest;
+    public $id = null;
 
     /**
      * @var string
@@ -17,9 +17,9 @@ class HarvestPackage extends ApiObject
     public $tag;
 
     /**
-     * @var string|null
+     * @var string
      */
-    public $room;
+    public $room = null;
 
     /**
      * @var string
@@ -29,12 +29,12 @@ class HarvestPackage extends ApiObject
     /**
      * @var float
      */
-    public $weight;
+    public $quantity = 0.00;
 
     /**
      * @var string
      */
-    public $unitOfWeight;
+    public $unitOfMeasure;
 
     /**
      * @var string
@@ -57,32 +57,16 @@ class HarvestPackage extends ApiObject
     public $productRequiresRemediation = false;
 
     /**
-     * @var bool
-     */
-    public $remediateProduct = false;
-
-    /**
-     * @var string|null
-     */
-    public $remediationMethodId = null;
-
-    /**
-     * @var null
-     */
-    public $remediationDate = null;
-
-    /**
-     * @var null
-     */
-    public $remediationSteps = null;
-
-    /**
      * @var \DateTimeInterface
      */
     public $actualDate;
 
-    //SBS added
+    /**
+     * @var array
+     */
     public $ingredients = array();
+
+    //SBS added
     public $Location = null;    
     public function setLocation(?string $Location): void
     {  
@@ -91,25 +75,20 @@ class HarvestPackage extends ApiObject
     public function getLocation(): ?string
     {  return $this->Location;     }
 
-    public function __construct()
+    /**
+     * @return string|null
+     */
+    public function getId(): ?string
     {
-        $this->actualDate = new \DateTime();
+        return $this->id;
     }
 
     /**
-     * @return int
+     * @param string|null $id
      */
-    public function getHarvest(): int
+    public function setId(?string $id): void
     {
-        return $this->harvest;
-    }
-
-    /**
-     * @param int $harvest
-     */
-    public function setHarvest(int $harvest): void
-    {
-        $this->harvest = $harvest;
+        $this->id = $id;
     }
 
     /**
@@ -129,17 +108,17 @@ class HarvestPackage extends ApiObject
     }
 
     /**
-     * @return string|null
+     * @return string
      */
-    public function getRoom(): ?string
+    public function getRoom(): string
     {
         return $this->room;
     }
 
     /**
-     * @param string|null $room
+     * @param string $room
      */
-    public function setRoom(?string $room): void
+    public function setRoom(string $room): void
     {
         $this->room = $room;
     }
@@ -147,6 +126,7 @@ class HarvestPackage extends ApiObject
     /**
      * @return string
      */
+    //public function getItem(): array //SBS changed string
     public function getItem(): string
     {
         return $this->item;
@@ -155,6 +135,7 @@ class HarvestPackage extends ApiObject
     /**
      * @param string $item
      */
+    //public function setItem(array $item): void //SBS Changed string $item): void
     public function setItem(string $item): void
     {
         $this->item = $item;
@@ -163,33 +144,33 @@ class HarvestPackage extends ApiObject
     /**
      * @return float
      */
-    public function getWeight(): float
+    public function getQuantity(): float
     {
-        return $this->weight;
+        return $this->quantity;
     }
 
     /**
-     * @param float $weight
+     * @param float $quantity
      */
-    public function setWeight(float $weight): void
+    public function setQuantity(float $quantity): void
     {
-        $this->weight = $weight;
+        $this->quantity = $quantity;
     }
 
     /**
      * @return string
      */
-    public function getUnitOfWeight(): string
+    public function getUnitOfMeasure(): string
     {
-        return $this->unitOfWeight;
+        return $this->unitOfMeasure;
     }
 
     /**
-     * @param string $unitOfWeight
+     * @param string $unitOfMeasure
      */
-    public function setUnitOfWeight(string $unitOfWeight): void
+    public function setUnitOfMeasure(string $unitOfMeasure): void
     {
-        $this->unitOfWeight = $unitOfWeight;
+        $this->unitOfMeasure = $unitOfMeasure;
     }
 
     /**
@@ -257,70 +238,6 @@ class HarvestPackage extends ApiObject
     }
 
     /**
-     * @return bool
-     */
-    public function isRemediateProduct(): bool
-    {
-        return $this->remediateProduct;
-    }
-
-    /**
-     * @param bool $remediateProduct
-     */
-    public function setRemediateProduct(bool $remediateProduct): void
-    {
-        $this->remediateProduct = $remediateProduct;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getRemediationMethodId(): ?string
-    {
-        return $this->remediationMethodId;
-    }
-
-    /**
-     * @param string|null $remediationMethodId
-     */
-    public function setRemediationMethodId(?string $remediationMethodId): void
-    {
-        $this->remediationMethodId = $remediationMethodId;
-    }
-
-    /**
-     * @return null
-     */
-    public function getRemediationDate()
-    {
-        return $this->remediationDate;
-    }
-
-    /**
-     * @param null $remediationDate
-     */
-    public function setRemediationDate($remediationDate): void
-    {
-        $this->remediationDate = $remediationDate;
-    }
-
-    /**
-     * @return null
-     */
-    public function getRemediationSteps()
-    {
-        return $this->remediationSteps;
-    }
-
-    /**
-     * @param null $remediationSteps
-     */
-    public function setRemediationSteps($remediationSteps): void
-    {
-        $this->remediationSteps = $remediationSteps;
-    }
-
-    /**
      * @return \DateTimeInterface
      */
     public function getActualDate(): \DateTimeInterface
@@ -329,10 +246,10 @@ class HarvestPackage extends ApiObject
     }
 
     /**
-     * @param \DateTimeInterface $actualDate
+     * @param \DateTimeInterface|string $actualDate
      * @throws InvalidMetrcResponseException
      */
-    public function setActualDate( $actualDate): void //SBS changed \DateTimeInterface $actualDate): void
+    public function setActualDate($actualDate): void
     {
         if(is_string($actualDate)) {
             $this->actualDate = new \DateTime($actualDate);
@@ -343,12 +260,17 @@ class HarvestPackage extends ApiObject
         }
     }
 
-    //SBS Added
+    /**
+     * @return array
+     */
     public function getIngredients(): array
     {
         return $this->ingredients;
     }
-    
+
+    /**
+     * @param array $ingredients
+     */
     public function setIngredients(array $ingredients): void
     {
         //dd($ingredients);
@@ -357,24 +279,22 @@ class HarvestPackage extends ApiObject
 
     public function toArray()
     {
+        //dd($this->getIngredients());
         return [
-            //'Harvest' => $this->getHarvest(),            
-            'Tag' => $this->getTag(),
-            'Room' => $this->getRoom(),
-            'Item' => $this->getItem(),
-            'Weight' => $this->getWeight(),
-            'UnitOfWeight' => $this->getUnitOfWeight(),
-            'PatientLicenseNumber' => $this->getPatientLicenseNumber(),
-            'IsProductionBatch' => $this->isProductionBatch(),
-            'ProductionBatchNumber' => $this->getProductionBatchNumber(),
-            'ProductRequiresRemediation' => $this->isProductRequiresRemediation(),
-            'RemediateProduct' => $this->isRemediateProduct(),
-            'RemediationMethodId' => $this->getRemediationMethodId(),
-            'RemediationDate' => $this->getRemediationDate(),
-            'RemediationSteps' => $this->getRemediationSteps(),
-            'ActualDate' => $this->actualDate->format('Y-m-d'),
-            "Ingredients" => $this->getIngredients(),             //SBS Added
-            "Location" => $this->getLocation()                    //SBS Added
+            "Tag" => $this->getTag(),
+            //"Room" => $this->getRoom(),
+            "Item" => $this->getItem(),
+            "Quantity" => $this->getQuantity(),
+            "UnitOfMeasure" => $this->getUnitOfMeasure(),
+            "PatientLicenseNumber" => $this->getPatientLicenseNumber(),
+            "IsProductionBatch" => $this->isProductionBatch(),
+            "ProductionBatchNumber" => $this->getProductionBatchNumber(),
+            "ProductRequiresRemediation" => $this->isProductRequiresRemediation(),
+            "ActualDate" => $this->getActualDate()->format(\DateTime::ISO8601),            
+            //"Ingredients" => [ $this->getIngredients() ],
+            "Ingredients" => $this->getIngredients(),            
+            "Location" => $this->getLocation()
         ];
     }
+
 }
