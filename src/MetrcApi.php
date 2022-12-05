@@ -140,18 +140,22 @@ class MetrcApi
         $result = curl_exec($ch);
 
         if($this->method != 'GET') {
-           Log::info("MetricApi@executeAction (POST request)", [
-                'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),            
-                'objects' => json_encode([$obj->toArray(),
-                'CURL API result' => $result
-                ])
-            ]);        
+            if(env('METRC_API_LOGGING')){
+                Log::info("MetricApi@executeAction (POST request)", [
+                        'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),            
+                        'objects' => json_encode([$obj->toArray(),
+                        'CURL API result' => $result
+                        ])
+                ]);
+            }
         }
         else{
-           Log::info("MetricApi@executeAction (GET request)", [
-                'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),
-                'CURL API result' => $result                                
-            ]);        
+            if(env('METRC_API_LOGGING')){
+                Log::info("MetricApi@executeAction (GET request)", [
+                        'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),
+                        'CURL API result' => $result                                
+                ]);
+            }
         }
 
         $response = new MetrcApiResponse();
