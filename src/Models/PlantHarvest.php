@@ -4,6 +4,8 @@ namespace MetrcApi\Models;
 
 use MetrcApi\Exception\InvalidMetrcResponseException;
 
+use Illuminate\Support\Facades\Log;
+
 class PlantHarvest extends ApiObject
 {
     /**
