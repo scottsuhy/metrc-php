@@ -7,7 +7,7 @@ This library is written for php 7.1 or better, and uses the ext-curl, and ext-js
 
 #### Using Composer
 ```
-composer require alternatehealth/metrc
+composer update scottsuhy/metrc-php
 ```
 
 ### Example Usage
