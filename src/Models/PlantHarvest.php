@@ -195,7 +195,9 @@ class PlantHarvest extends ApiObject
     public function getDryingLocation(): ?string
     {  return $this->DryingLocation;  } 
 
-    public function toArray()
+//changed 12/6/22 -------------------------------------------------------
+
+    public function toArray_old()
     {
         return [
             //'Id' => $this->getId(),
@@ -208,5 +210,49 @@ class PlantHarvest extends ApiObject
             'ActualDate' => $this->getActualDate()->format('Y-m-d'),
             'DryingLocation' => $this->getDryingLocation()    
         ];
+    }
+
+//new 12/6/22 -------------------------------------------------------
+ 
+    public function getPlantArray()
+    {
+        return $this->plantArray;
+    }
+
+    public function setPlantArray(array $plantArray)
+    {
+        $this->plantArray = $plantArray;
+    }
+ 
+    public function toArray()                      
+    {
+        $plantArray = $this->getPlantArray();
+        $harvestArray = [];
+
+        if(env('METRC_API_LOGGING')){
+            Log::info("PlantHarvest@toArray", [
+                '$plantArray' => $plantArray
+            ]);
+        }
+
+        foreach($plantArray as $plant){
+            array_push($harvestArray, [                                      
+                'Plant' => $plant,            
+                'PatientLicenseNumber' => $this->getPatientLicenseNumber(),
+                'HarvestName' => $this->getHarvestName(),
+                'Weight' => $this->getWeight(),
+                'UnitOfWeight' => $this->getUnitOfWeight(),
+                'ActualDate' => $this->getActualDate()->format('Y-m-d'),
+                'DryingLocation' => $this->getDryingLocation()    
+            ]);
+        }
+
+        if(env('METRC_API_LOGGING')){
+            Log::info("PlantHarvest@toArray", [
+                '$harvestArray' => $harvestArray
+            ]);
+        }
+
+        return $harvestArray;
     }
 }
