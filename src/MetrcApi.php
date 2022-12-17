@@ -131,8 +131,7 @@ class MetrcApi
                     ]));
 
                 } else {
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([$obj->toArray()]));
-                    //dd(json_encode([$obj->toArray()]));
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($obj->toArray()));                    
                 }
             }
         }
@@ -154,7 +153,7 @@ class MetrcApi
                 $curl_verbose_message2 = "Curl verbose information: " . htmlspecialchars($verboseLog);    
                 Log::info("MetricApi@executeAction (POST request)", [
                     'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),            
-                    'objects' => json_encode([$obj->toArray()]),
+                    'objects' => json_encode($obj->toArray()),
                     'CURL API result' => $result,
                     'curl_verbose_message1' => $curl_verbose_message1,
                     'curl_verbose_message2' => $curl_verbose_message2

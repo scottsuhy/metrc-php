@@ -229,6 +229,41 @@ class PlantHarvest extends ApiObject
     public function toArray()                      
     {
         $plantArray = $this->getPlantArray();
+        $harvestArray = array();
+        $oneplant = array();
+
+        if(env('METRC_API_LOGGING')){
+            Log::info("PlantHarvest@toArray", [
+                '$plantArray' => $plantArray
+            ]);
+        }        
+
+        foreach($plantArray as $plant){            
+            $oneplant = [
+                'Plant' => $plant,            
+                'PatientLicenseNumber' => null, //$this->getPatientLicenseNumber(), //changed per metrc support
+                'HarvestName' => $this->getHarvestName(),
+                'Weight' => $this->getWeight(),
+                'UnitOfWeight' => $this->getUnitOfWeight(),
+                'ActualDate' => $this->getActualDate()->format('Y-m-d'),
+                'DryingLocation' => $this->getDryingLocation()    
+            ];
+            
+            $harvestArray[] = $oneplant;
+        }
+
+        if(env('METRC_API_LOGGING')){
+            Log::info("PlantHarvest@toArray", [
+                '$harvestArray' => $harvestArray
+            ]);
+        }
+
+        return $harvestArray;
+    }
+    
+    /*public function toArray()                      
+    {
+        $plantArray = $this->getPlantArray();
         $harvestArray = [];
 
         if(env('METRC_API_LOGGING')){
@@ -256,5 +291,5 @@ class PlantHarvest extends ApiObject
         }
 
         return $harvestArray;
-    }
+    }*/
 }
