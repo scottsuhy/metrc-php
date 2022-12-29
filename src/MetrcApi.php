@@ -111,12 +111,16 @@ class MetrcApi
                 'Content-Type: application/json'
             ],
             CURLOPT_RETURNTRANSFER => 1
-        ]);
+        ]);        
 
-        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
+        //Tell cURL that it should only spend 300 seconds trying to connect to the URL in question.
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
+
+        //A given cURL operation should only take 300 seconds max.
+        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
 
         // The maximum execution time, in seconds. If set to zero, no time limit is imposed.
-        set_time_limit(0);
+        set_time_limit(300);
 
         // Make sure to keep alive the script when a client disconnects.
         ignore_user_abort(true);
