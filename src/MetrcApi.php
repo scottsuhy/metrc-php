@@ -113,6 +113,14 @@ class MetrcApi
             CURLOPT_RETURNTRANSFER => 1
         ]);
 
+        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
+
+        // The maximum execution time, in seconds. If set to zero, no time limit is imposed.
+        set_time_limit(0);
+
+        // Make sure to keep alive the script when a client disconnects.
+        ignore_user_abort(true);
+
         if($this->method != 'GET') {
             if($this->method == 'POST') {
                 curl_setopt($ch, CURLOPT_POST, true);                
