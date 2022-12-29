@@ -149,11 +149,18 @@ class MetrcApi
             $streamVerboseHandle = fopen('php://temp', 'w+');
             curl_setopt($ch, CURLOPT_STDERR, $streamVerboseHandle);
 
-            Log::info("MetricApi@executeAction (before call to METRC)", [
-                'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),                            
-                'objects' => json_encode($obj->toArray())                
-            ]);  
-
+            /*if($obj) {
+                if(is_iterable($obj)) {
+                    Log::info("MetricApi@executeAction (before call to METRC)", [
+                        'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL)                        
+                    ]);  
+                } else {
+                    Log::info("MetricApi@executeAction (before call to METRC)", [
+                        'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),                            
+                        'objects' => json_encode($obj->toArray())                
+                    ]); 
+                }
+            }*/
         }
 
         $result = curl_exec($ch);
