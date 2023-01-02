@@ -820,6 +820,13 @@ class MetrcApi
         return $response->getResponse();
     }
 
+    public function getHarvestWasteTypes(): ?array
+    {
+        $this->route = '/harvests/v1/waste/types';
+        $response = $this->executeAction();
+        return $response->getResponse();
+    }
+
     /**
      * Destroy a plant
      *
