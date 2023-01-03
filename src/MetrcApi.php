@@ -141,7 +141,7 @@ class MetrcApi
             $streamVerboseHandle = fopen('php://temp', 'w+');
             curl_setopt($ch, CURLOPT_STDERR, $streamVerboseHandle);
 
-            /*if($obj) {
+            if($obj) {
                 if(is_iterable($obj)) {
                     Log::info("MetricApi@executeAction (before call to METRC)", [
                         'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL)                        
@@ -152,7 +152,7 @@ class MetrcApi
                         'objects' => json_encode($obj->toArray())                
                     ]); 
                 }
-            }*/
+            }
         }
 
         //some POSTS to METRC take forever and result in a 504.  code below is to try to help with this issue
