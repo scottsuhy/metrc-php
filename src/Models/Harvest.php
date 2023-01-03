@@ -62,9 +62,9 @@ class Harvest extends ApiObject
 
     public function toArray()
     {
-        return [
+        return array([
             'Id' => $this->getId(),
             'ActualDate' => $this->getActualDate()->format('Y-m-d')
-        ];
+        ]);
     }
 }
