@@ -118,12 +118,12 @@ class HarvestWaste extends ApiObject
 
     public function toArray()
     {
-        return [
+        return array([
             'Id' => $this->getId(),
             'UnitOfWeight' => $this->getUnitOfWeight(),
             'WasteWeight' => $this->getWasteWeight(),
             'WasteType' => $this->getWasteType(), //SBS Added
             'ActualDate' => $this->getActualDate()->format('Y-m-d')
-        ];
+        ]);
     }
 }
