@@ -100,7 +100,7 @@ class MetrcApi
      */
     private function executeAction($obj = false): MetrcApiResponse
     {
-        //dd($obj);
+        
         $base = $this->sandbox ? self::SANDBOX_URL : self::PRODUCTION_URL;
         $base = str_replace('%state%', $this->state, $base);
 
@@ -136,18 +136,18 @@ class MetrcApi
             }
         }
 
-        if(env('METRC_API_LOGGING')){
-            curl_setopt($ch, CURLOPT_VERBOSE, true);
-            $streamVerboseHandle = fopen('php://temp', 'w+');
-            curl_setopt($ch, CURLOPT_STDERR, $streamVerboseHandle);
+        if(auth()->user()->userlogging){
+            //curl_setopt($ch, CURLOPT_VERBOSE, true);
+            //$streamVerboseHandle = fopen('php://temp', 'w+');
+            //curl_setopt($ch, CURLOPT_STDERR, $streamVerboseHandle);
 
             if($obj) {
                 if(is_iterable($obj)) {
-                    Log::info("MetricApi@executeAction (before call to METRC)", [
+                    Log::info("MetricApi@executeAction (before call to METRC - iterable)", [
                         'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL)                        
                     ]);  
                 } else {
-                    Log::info("MetricApi@executeAction (before call to METRC)", [
+                    Log::info("MetricApi@executeAction (before call to METRC - not iterable)", [
                         'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),                            
                         'objects' => json_encode($obj->toArray())                
                     ]); 
@@ -166,24 +166,24 @@ class MetrcApi
         $result = curl_exec($ch);
 
         if($this->method != 'GET') {
-            if(env('METRC_API_LOGGING')){                
+            if(auth()->user()->userlogging){                
 
-                $curl_verbose_message1 = "Curl error: " . curl_errno($ch) . htmlspecialchars(curl_error($ch));
-                rewind($streamVerboseHandle);
-                $verboseLog = stream_get_contents($streamVerboseHandle);                
-                $curl_verbose_message2 = "Curl verbose information: " . htmlspecialchars($verboseLog);    
+                //$curl_verbose_message1 = "Curl error: " . curl_errno($ch) . htmlspecialchars(curl_error($ch));
+                //rewind($streamVerboseHandle);
+                //$verboseLog = stream_get_contents($streamVerboseHandle);                
+                //$curl_verbose_message2 = "Curl verbose information: " . htmlspecialchars($verboseLog);    
                 Log::info("MetricApi@executeAction (POST request)", [
                     'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),            
                     'objects' => json_encode($obj->toArray()),
                     'CURL API result' => $result,
-                    'curl_verbose_message1' => $curl_verbose_message1,
-                    'curl_verbose_message2' => $curl_verbose_message2
+                    //'curl_verbose_message1' => $curl_verbose_message1,
+                    //'curl_verbose_message2' => $curl_verbose_message2
                 ]);                       
 
             }
         }
         else{
-            if(env('METRC_API_LOGGING')){
+            if(auth()->user()->userlogging){
                 Log::info("MetricApi@executeAction (GET request)", [
                         'URL' => curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),
                         'CURL API result' => $result                                
@@ -195,7 +195,7 @@ class MetrcApi
         $response->setRawResponse($result);
         $response->setHttpCode(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
-        if(env('METRC_API_LOGGING')){
+        if(auth()->user()->userlogging){
             Log::info("MetricApi@executeAction (CURL response)", [
                     '$response->success' => $response->success,
                     '$response' => $response

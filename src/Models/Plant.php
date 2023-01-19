@@ -236,7 +236,7 @@ class Plant extends ApiObject
 
     public function toArray()
     {
-        return [
+        return array([
             'Id' => $this->getId(),
             'Label' => $this->getLabel(),
             'PlantLabel' => $this->getLabel(),
@@ -265,6 +265,6 @@ class Plant extends ApiObject
             'Weight' => $this->getWeight(),
             'UnitOfWeight' => $this->getUnitOfWeight(),
             'DryingLocation' => $this->getDryingLocation()            
-        ];
+        ]);
     }
 }
