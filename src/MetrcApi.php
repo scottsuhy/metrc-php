@@ -508,9 +508,9 @@ class MetrcApi
      * @return Package|null
      * @throws \Exception|InvalidMetrcResponseException
      */
-    public function getPackage($id): MetrcApiResponse //SBS changed ?Package
+    public function getPackage($Label): MetrcApiResponse //SBS changed ?Package
     {
-        $this->route = '/packages/v1/' . $id;
+        $this->route = '/packages/v1/' . $Label;
         $response = $this->executeAction();
        //Log::info("MetricApi@getPackage (response)", ['$response'=>$response]);
 /*

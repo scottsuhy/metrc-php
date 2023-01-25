@@ -357,7 +357,7 @@ class HarvestPackage extends ApiObject
 
     public function toArray()
     {
-        return [
+        return array([
             //'Harvest' => $this->getHarvest(),            
             'Tag' => $this->getTag(),
             'Room' => $this->getRoom(),
@@ -375,6 +375,6 @@ class HarvestPackage extends ApiObject
             'ActualDate' => $this->actualDate->format('Y-m-d'),
             "Ingredients" => $this->getIngredients(),             //SBS Added
             "Location" => $this->getLocation()                    //SBS Added
-        ];
+        ]);
     }
 }
