@@ -15,6 +15,7 @@ use MetrcApi\Models\ItemCategory;
 use MetrcApi\Models\LabTest;
 use MetrcApi\Models\Package;
 use MetrcApi\Models\Package2;
+use MetrcApi\Models\PackageCreatePlantings;
 use MetrcApi\Models\PackageAdjustment;
 use MetrcApi\Models\PackageChangeItem;
 use MetrcApi\Models\PackageFinish;
