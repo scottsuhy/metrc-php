@@ -871,6 +871,17 @@ class MetrcApi
         return $response;
     }
 
+    //SBS 3_8_2023
+    public function packagesCreatePlantings(PackageCreatePlantings $package): MetrcApiResponse
+    {
+        $this->route = '/packages/v1/create/plantings';
+        $this->method = 'POST';
+        Log::info("MetricApi@packagesCreatePlantings", ['$package'=> $package]);
+        $response = $this->executeAction($package);
+        Log::info("MetricApi@packagesCreatePlantings (response)", ['$response'=>$response]);
+        return $response;
+    }
+
     public function plantsCreatePlantBatchPackages(Plant $plant): MetrcApiResponse
     {
         $this->route = '/plants/v1/create/plantbatch/packages';                        
