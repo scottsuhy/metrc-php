@@ -167,7 +167,7 @@ class PlantBatchPlantingGrowthPhase extends ApiObject
 
     public function toArray()
     {
-        return [
+        return array([
             'Name' => $this->getName(),
             'Count' => $this->getCount(),
             'StartingTag' => $this->getStartingTag(),
@@ -175,6 +175,6 @@ class PlantBatchPlantingGrowthPhase extends ApiObject
             'NewRoom' => $this->getNewRoom(),
             'GrowthDate' => $this->growthDate->format('Y-m-d'),
             'PatientLicenseNumber' => $this->getPatientLicenseNumber()
-        ];
+        ]);
     }
 }
