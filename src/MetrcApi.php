@@ -101,8 +101,15 @@ class MetrcApi
      */
     private function executeAction($obj = false): MetrcApiResponse
     {
-        
-        $base = $this->sandbox ? self::SANDBOX_URL : self::PRODUCTION_URL;
+                
+        //commented this out and added 5 lines so it would go to sandbox when using the license METRC gave us to test with
+        //$base = $this->sandbox ? self::SANDBOX_URL : self::PRODUCTION_URL;
+        if($this->licenseNumber == "C12-1000002-LIC"){ 
+            $base = self::SANDBOX_URL;
+        } else {
+            $base = self::PRODUCTION_URL;
+        }
+
         $base = str_replace('%state%', $this->state, $base);
 
         $ch = curl_init($base.$this->route.'?'.http_build_query($this->queryParams));
