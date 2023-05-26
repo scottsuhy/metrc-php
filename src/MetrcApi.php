@@ -84,6 +84,35 @@ class MetrcApi
      */
     public function __construct(string $username, string $password, string $licenseNumber, bool $sandbox = false, string $state = 'ca')
     {
+        if($licenseNumber == "C12-1000002-LIC"){ 
+            $this->username      = "TIR0POTww8fwEWAqYiSjalz9tIvZQtgLOyYOmJ6doxNgKz3L";
+            $this->password      = "FusVbe4Yv6W1DGNuxKNhByXU6RO6jSUPcbRCoRDD98VNXc4D";            
+            $this->sandbox       = true;
+            Log::info("MetricApi@__construct (using the sandbox)", [
+                'license' => $licenseNumber,
+                'username' => $this->username,
+                'password' =>$this->password,
+                'sandbox' => $this->sandbox
+            ]);
+        } else {
+            $this->username      = $username;
+            $this->password      = $password;            
+            $this->sandbox       = $sandbox;
+            Log::info("MetricApi@__construct (using production)", [
+                'license' => $licenseNumber,
+                'username' => $this->username,
+                'password' =>$this->password,
+                'sandbox' => $this->sandbox
+            ]);
+        }
+
+        $this->licenseNumber = $licenseNumber;
+        $this->queryParams   = [
+            'licenseNumber' => $this->licenseNumber
+        ];
+        $this->state = $state;
+        
+        /*
         $this->username      = $username;
         $this->password      = $password;
         $this->licenseNumber = $licenseNumber;
@@ -92,6 +121,7 @@ class MetrcApi
             'licenseNumber' => $this->licenseNumber
         ];
         $this->state = $state;
+        */
     }
 
     /**
