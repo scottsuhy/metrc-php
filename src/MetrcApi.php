@@ -112,6 +112,11 @@ class MetrcApi
 
         $base = str_replace('%state%', $this->state, $base);
 
+        Log::info("MetricApi@executeAction (is this the sandbox or prod)", [
+            '$base' => $base,
+            'license' =>$this->licenseNumber
+        ]);
+
         $ch = curl_init($base.$this->route.'?'.http_build_query($this->queryParams));
         curl_setopt_array($ch, [
             CURLOPT_HTTPHEADER => [
