@@ -53,9 +53,9 @@ class PackageFinish extends ApiObject
 
     public function toArray()
     {
-        return [
+        return array([
             'Label' => $this->getLabel(),
             'ActualDate' => $this->getActualDate()->format('Y-m-d')
-        ];
+        ]);
     }
 }
