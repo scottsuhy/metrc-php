@@ -222,8 +222,9 @@ class Plant extends ApiObject
      * @return string|null
      */
     public function getReasonNote(): ?string
-    {
-        return $this->reasonNote;
+    {        
+        //return $this->reasonNote;
+        return $this->ReasonNote;
     }
 
     /**
@@ -231,7 +232,8 @@ class Plant extends ApiObject
      */
     public function setReasonNote(?string $reasonNote): void
     {
-        $this->reasonNote = $reasonNote;
+        //$this->reasonNote = $reasonNote;        
+        $this->ReasonNote = $reasonNote;        
     }
 
     public function toArray()
